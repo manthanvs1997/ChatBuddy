@@ -1,0 +1,99 @@
+ChatBuddy - Detailed Code Explanation
+=====================================
+
+1. Imports & Environment Setup
+------------------------------
+import streamlit as st
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.output_parsers import StrOutputParser
+from langchain_ollama import OllamaLLM as Ollama
+import os
+from dotenv import load_dotenv
+import time
+
+- streamlit: For building interactive web apps.
+- ChatPromptTemplate: To create structured prompt inputs for the LLM.
+- StrOutputParser: Parses the model's output to plain string.
+- OllamaLLM: LangChain wrapper to interface with Ollama models.
+- os, dotenv: For environment variables (.env support).
+- time: Optional delay/streaming simulation.
+
+2. Environment Variables
+------------------------
+load_dotenv()
+os.environ['LANGCHAIN_TRACING_V2'] = 'true'
+os.environ['LANGCHAIN_API_KEY'] = os.getenv('LANGCHAIN_API_KEY')
+
+- Enables LangChain tracing for debugging.
+- Loads sensitive API keys from a .env file securely.
+
+3. Page Configuration & Custom CSS
+----------------------------------
+st.set_page_config(...)
+st.markdown("<style>...</style>", unsafe_allow_html=True)
+
+- Configures the layout of the Streamlit app.
+- Custom CSS applied for layout and aesthetics.
+
+4. Header & Settings Toggle Button
+----------------------------------
+if "show_settings" not in st.session_state:
+    st.session_state.show_settings = False
+
+- Adds a state to toggle settings UI.
+
+5. Settings Panel
+-----------------
+if st.session_state.show_settings:
+    with st.expander("Settings", expanded=True):
+        - Temperature slider: Controls randomness of model.
+        - Clear conversation button.
+        - Static model info (llama2).
+
+6. Session State Initialization
+-------------------------------
+- chat_history: Stores all chat messages.
+- conversation_started: Tracks if chat has started.
+- thinking: Prevents re-submission during LLM response.
+
+7. Chat Container
+-----------------
+chat_container = st.container()
+
+- Main UI block to render chat.
+
+8. Cached LLM Loader
+--------------------
+@st.cache_resource
+def get_llm(temperature):
+    return Ollama(model="llama2", temperature=temperature)
+
+- Caches the LLM instance to prevent reloads.
+
+9. User Input Box
+-----------------
+user_input = st.chat_input("Ask me anything...", ...)
+
+- Text input box placed at the bottom of chat.
+
+10. Handle User Input
+---------------------
+if user_input:
+    - Appends user message to chat history.
+    - Sets thinking to True.
+    - Displays message instantly.
+
+11. Generate Assistant Response
+-------------------------------
+if st.session_state.thinking:
+    - Adds system prompt + chat history.
+    - Builds LangChain chain: prompt | model | parser
+    - Gets model output and appends to history.
+    - Handles errors gracefully.
+
+12. Display Chat History
+------------------------
+- Renders previous conversation from chat_history.
+- Shows avatars and markdown-styled messages.
+- Welcome message appears if no chat has occurred yet.
+
