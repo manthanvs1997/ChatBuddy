@@ -5,3 +5,4 @@ langchain_community
 langserve
 fastapi
 uvicorn
+langchain_ollama
